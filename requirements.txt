@@ -1,7 +1,6 @@
+torch
 fastapi
 uvicorn
-ultralytics
-torch
 pillow
 python-multipart
 numpy
