@@ -4,9 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import os
-from ultralytics import YOLO
-
-model = YOLO("models/yolo11n.pt")
 
 from src.parts.api_parts import app as parts_app
 from src.diagnostics.api_diagnostics import app as diagnostics_app
@@ -48,6 +45,13 @@ app.mount("/ecu", ecu_app)
 if os.path.isdir("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+@app.on_event("startup")
+async def load_models():
+    from ultralytics import YOLO
+    app.state.yolo = YOLO("models/yolo11n.pt")
+
+
 @app.get("/")
 async def root():
     return {
@@ -59,6 +63,7 @@ async def root():
             "ecu": "/ecu"
         }
     }
+
 
 @app.get("/{full_path:path}")
 async def spa_fallback(full_path: str):
