@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.10
 
 WORKDIR /app
 
@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender1 \
     libxcb1 \
+    libx11-6 \
+    libxau6 \
+    libxdmcp6 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
