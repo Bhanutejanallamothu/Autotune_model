@@ -7,4 +7,3 @@ python-multipart
 numpy
 pyyaml
 pydantic
-opencv-python==0
