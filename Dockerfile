@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 RUN pip install --upgrade pip \
- && pip install torch fastapi uvicorn pillow python-multipart numpy pyyaml pydantic \
- && pip install --no-deps ultralytics \
+ && pip install -r requirements.txt \
+ && pip install torch --index-url https://download.pytorch.org/whl/cpu \
+ && pip install ultralytics \
  && pip install --no-cache-dir opencv-python-headless==4.13.0.90 \
  && pip uninstall -y opencv-python
 
