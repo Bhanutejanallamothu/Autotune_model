@@ -5,17 +5,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
-    libxcb1 \
-    libx11-6 \
-    libxau6 \
-    libxdmcp6 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless || true \
+    && pip install --no-cache-dir opencv-python-headless==4.9.0.80
 
 COPY . .
 
