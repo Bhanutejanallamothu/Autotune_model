@@ -1,7 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse, FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import RedirectResponse
+import os
+from ultralytics import YOLO
+
+model = YOLO("models/yolo11n.pt")
 
 from src.parts.api_parts import app as parts_app
 from src.diagnostics.api_diagnostics import app as diagnostics_app
@@ -19,50 +24,45 @@ class LowercasePathMiddleware(BaseHTTPMiddleware):
 
 app = FastAPI(
     title="AutoTuning.AI Unified API",
-    version="1.0"
+    version="1.0.0"
 )
 
-# ✅ CORS MUST BE HERE (ROOT APP)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:9002",
         "http://localhost:3000",
+        "http://localhost:9002",
+        "https://*.hf.space"
     ],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
-# ✅ Lowercase paths
 app.add_middleware(LowercasePathMiddleware)
 
-# ✅ Mount sub-apps
 app.mount("/parts", parts_app)
 app.mount("/diagnostics", diagnostics_app)
 app.mount("/ecu", ecu_app)
 
+if os.path.isdir("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
-def root():
+async def root():
     return {
         "status": "ok",
         "service": "AutoTuning.AI",
         "apis": {
-            "parts": "/parts/identify-part",
-            "diagnostics": "/diagnostics/probable-cause",
-            "ecu": "/ecu/recommend"
+            "parts": "/parts",
+            "diagnostics": "/diagnostics",
+            "ecu": "/ecu"
         }
     }
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import os
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/{full_path:path}")
-async def serve_frontend(full_path: str):
+async def spa_fallback(full_path: str):
     index_path = os.path.join("static", "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return {"error": "Frontend not built"}
+    return {"error": "Not Found"}
