@@ -9,14 +9,15 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
+    libxcb1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+COPY constraints.txt .
 
 RUN pip install --upgrade pip \
- && pip install -r requirements.txt \
- && pip uninstall -y opencv-python \
- && pip install --no-cache-dir opencv-python-headless==4.9.0.80
+ && pip install -r requirements.txt -c constraints.txt \
+ && pip install --no-cache-dir opencv-python-headless==4.13.0.90
 
 COPY . .
 
